@@ -16,7 +16,24 @@ const (
 	coderMessageType_Binary
 	coderMessageType_Invoke
 	coderMessageType_InvokeRecive
+	coderMessageType_InvokeNameError
 )
+
+func (c coderMessageType) String() (r string) {
+	switch c {
+	case coderMessageType_Unknown:
+		r = "coderMessageType_Unknown"
+	case coderMessageType_Binary:
+		r = "coderMessageType_Binary"
+	case coderMessageType_Invoke:
+		r = "coderMessageType_Invoke"
+	case coderMessageType_InvokeRecive:
+		r = "coderMessageType_InvokeRecive"
+	case coderMessageType_InvokeNameError:
+		r = "coderMessageType_InvokeNameError"
+	}
+	return
+}
 
 type CoderMessage struct {
 	ID   string

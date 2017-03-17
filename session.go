@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	hio "github.com/hprose/hprose-golang/io"
+	"github.com/nzlov/glog"
 )
 
 type session struct {
@@ -12,6 +13,7 @@ type session struct {
 	coder     Coder
 	sendChan  chan CoderMessage
 	reciveMap map[string]chan []interface{}
+	function  map[string]interface{}
 }
 
 func NewSession(n int, coder Coder) *session {
@@ -20,6 +22,7 @@ func NewSession(n int, coder Coder) *session {
 		coder:     coder,
 		sendChan:  make(chan CoderMessage, n),
 		reciveMap: make(map[string]chan []interface{}),
+		function:  make(map[string]interface{}),
 	}
 }
 
@@ -27,6 +30,9 @@ func (s *session) AddConn(c *conn) {
 	c.setSession(s)
 	go c.start()
 	s.pool <- c
+}
+func (s *session) AddFunction(name string, f interface{}) {
+	s.function[name] = f
 }
 
 func (s *session) sendmessage(message CoderMessage) {
@@ -41,7 +47,20 @@ func (s *session) recivemessage(message CoderMessage) {
 	switch message.Type {
 	case coderMessageType_Invoke:
 		message.Type = coderMessageType_InvokeRecive
-		message.Msg = []interface{}{3}
+		name := message.Msg[0].(string)
+		args := make([]reflect.Value, 0)
+		hio.Unmarshal(message.Msg[1].([]byte), &args)
+		if f, ok := s.function[name]; ok {
+			fv := reflect.ValueOf(f)
+			nargs := make([]reflect.Value, len(args))
+			for i, v := range args {
+				nargs[i] = v.Elem()
+			}
+			r := fv.Call(nargs)
+			message.Msg = []interface{}{hio.Marshal(r)}
+		} else {
+			message.Type = coderMessageType_InvokeNameError
+		}
 		s.sendmessage(message)
 	case coderMessageType_InvokeRecive:
 		if v, ok := s.reciveMap[message.ID]; ok {
@@ -171,13 +190,20 @@ func (s *session) Invoke(
 		Msg:  body,
 	})
 	recives := <-reciveChan
-	if results == nil && len(outTypes) > 0 {
-		n := len(recives)
-		results = make([]reflect.Value, n)
-		for i := 0; i < n; i++ {
-			results[i] = reflect.ValueOf(recives[i])
-		}
+	glog.Debugln("recives", recives)
+	args = make([]reflect.Value, 0)
+	hio.Unmarshal(recives[0].([]byte), &args)
+	results = make([]reflect.Value, len(args))
+	for i, v := range args {
+		results[i] = v.Elem()
 	}
+	//if results == nil && len(outTypes) > 0 {
+	//	n := len(recives)
+	//	results = make([]reflect.Value, n)
+	//	for i := 0; i < n; i++ {
+	//		results[i] = reflect.ValueOf(recives[i])
+	//	}
+	//}
 	return
 }
 
