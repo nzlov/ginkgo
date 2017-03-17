@@ -1,0 +1,63 @@
+<component name="libraryTable">
+  <library name="GOPATH &lt;ginkgo&gt;">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../../cmusic" />
+      <root url="file://$PROJECT_DIR$/../../../qtexample" />
+      <root url="file://$PROJECT_DIR$/../../../engo.io" />
+      <root url="file://$PROJECT_DIR$/../../../h2" />
+      <root url="file://$PROJECT_DIR$/../../../testiris" />
+      <root url="file://$PROJECT_DIR$/../../../md5web" />
+      <root url="file://$PROJECT_DIR$/../../../testplugin" />
+      <root url="file://$PROJECT_DIR$/../../../lkweb" />
+      <root url="file://$PROJECT_DIR$/../../../testlua" />
+      <root url="file://$PROJECT_DIR$/../../../tsignal" />
+      <root url="file://$PROJECT_DIR$/../../../utils2" />
+      <root url="file://$PROJECT_DIR$/../../../mywebsite" />
+      <root url="file://$PROJECT_DIR$/../.." />
+      <root url="file://$PROJECT_DIR$/../../../golang.org" />
+      <root url="file://$PROJECT_DIR$/../../../leafserverdb" />
+      <root url="file://$PROJECT_DIR$/../../../majianmusic" />
+      <root url="file://$PROJECT_DIR$/../../../ninaweb" />
+      <root url="file://$PROJECT_DIR$/../../../gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../../../testhprose" />
+      <root url="file://$PROJECT_DIR$/../../../babystory" />
+      <root url="file://$PROJECT_DIR$/../../../leafchatserver" />
+      <root url="file://$PROJECT_DIR$/../../../layeh.com" />
+      <root url="file://$PROJECT_DIR$/../../../ginkgo" />
+      <root url="file://$PROJECT_DIR$/../../../sourcegraph.com" />
+      <root url="file://$PROJECT_DIR$/../../../filebrower" />
+      <root url="file://$PROJECT_DIR$/../../../md5" />
+    </CLASSES>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../../../cmusic" />
+      <root url="file://$PROJECT_DIR$/../../../qtexample" />
+      <root url="file://$PROJECT_DIR$/../../../engo.io" />
+      <root url="file://$PROJECT_DIR$/../../../h2" />
+      <root url="file://$PROJECT_DIR$/../../../testiris" />
+      <root url="file://$PROJECT_DIR$/../../../md5web" />
+      <root url="file://$PROJECT_DIR$/../../../testplugin" />
+      <root url="file://$PROJECT_DIR$/../../../lkweb" />
+      <root url="file://$PROJECT_DIR$/../../../testlua" />
+      <root url="file://$PROJECT_DIR$/../../../tsignal" />
+      <root url="file://$PROJECT_DIR$/../../../utils2" />
+      <root url="file://$PROJECT_DIR$/../../../mywebsite" />
+      <root url="file://$PROJECT_DIR$/../.." />
+      <root url="file://$PROJECT_DIR$/../../../golang.org" />
+      <root url="file://$PROJECT_DIR$/../../../leafserverdb" />
+      <root url="file://$PROJECT_DIR$/../../../majianmusic" />
+      <root url="file://$PROJECT_DIR$/../../../ninaweb" />
+      <root url="file://$PROJECT_DIR$/../../../gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../../../testhprose" />
+      <root url="file://$PROJECT_DIR$/../../../babystory" />
+      <root url="file://$PROJECT_DIR$/../../../leafchatserver" />
+      <root url="file://$PROJECT_DIR$/../../../layeh.com" />
+      <root url="file://$PROJECT_DIR$/../../../ginkgo" />
+      <root url="file://$PROJECT_DIR$/../../../sourcegraph.com" />
+      <root url="file://$PROJECT_DIR$/../../../filebrower" />
+      <root url="file://$PROJECT_DIR$/../../../md5" />
+    </SOURCES>
+    <excluded>
+      <root url="file://$PROJECT_DIR$" />
+    </excluded>
+  </library>
+</component>
