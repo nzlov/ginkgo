@@ -5,8 +5,6 @@ import (
 	"net"
 
 	"errors"
-
-	"github.com/nzlov/glog"
 )
 
 type coderMessageType int
@@ -63,7 +61,7 @@ func (g *GobCoder) GetCoder(conn net.Conn) Coder {
 	}
 }
 func (g *GobCoder) Encoder(message CoderMessage) error {
-	glog.Debugln("GobCoder", "Encoder", message)
+	//glog.Debugln("GobCoder", "Encoder", message)
 	err := g.e.Encode(message)
 	return err
 }

@@ -1,10 +1,6 @@
 package ginkgo
 
-import (
-	"net"
-
-	"github.com/nzlov/glog"
-)
+import "net"
 
 type conn struct {
 	baseConn net.Conn
@@ -37,34 +33,38 @@ func (c *conn) start() {
 			c.stop()
 		}()
 		for c.isRunning {
-			glog.Debugln("Conn", "Recive", "Wait")
+			//glog.Debugln("Conn", "Recive", "Wait")
 			n, err := c.coder.Decoder()
 			if err != nil {
-				glog.NewTagField("conn").Errorln("reicve", err)
+				//glog.NewTagField("conn").Errorln("reicve", err)
 				return
 			}
-			glog.Debugln("Conn", "Recive", n)
+			//glog.Debugln("Conn", "Recive", n)
 			c.session.recivemessage(n)
 		}
 	}()
-	glog.Debugln("Conn", "Start")
+	//glog.Debugln("Conn", "Start")
 	for m := range c.sendChan {
 		if c.isRunning {
 			err := c.coder.Encoder(m)
 			if err != nil {
-				glog.NewTagField("conn").Errorln("send", err)
+				//glog.NewTagField("conn").Errorln("send", err)
 				c.stop()
 				return
 			}
 		} else {
-			c.session.sendmessage(m)
+			c.session.sendmessage(m, 0)
 		}
 	}
+	c.baseConn.Close()
+	c.session.connclose(c)
 }
 func (c *conn) stop() {
+	if !c.isRunning {
+		return
+	}
 	c.isRunning = false
 	close(c.sendChan)
-
 }
 
 func (c *conn) send(message CoderMessage) bool {

@@ -4,43 +4,82 @@ import (
 	"errors"
 	"reflect"
 
+	"fmt"
+
+	"sync"
+
+	"time"
+
 	hio "github.com/hprose/hprose-golang/io"
-	"github.com/nzlov/glog"
 )
 
 type session struct {
-	pool      chan *conn
+	isRunning bool
+	count     int
+	pool      *pool
 	coder     Coder
 	sendChan  chan CoderMessage
-	reciveMap map[string]chan []interface{}
+	reciveMap map[string]chan CoderMessage
 	function  map[string]interface{}
+	mutex     sync.Mutex
 }
 
 func NewSession(n int, coder Coder) *session {
 	return &session{
-		pool:      make(chan *conn, n),
+		isRunning: true,
+		count:     n,
+		pool:      newPool(n),
 		coder:     coder,
 		sendChan:  make(chan CoderMessage, n),
-		reciveMap: make(map[string]chan []interface{}),
+		reciveMap: make(map[string]chan CoderMessage),
 		function:  make(map[string]interface{}),
+		mutex:     sync.Mutex{},
 	}
 }
 
 func (s *session) AddConn(c *conn) {
 	c.setSession(s)
-	go c.start()
-	s.pool <- c
+	b := s.pool.Add(c)
+	if b {
+		go c.start()
+	}
+}
+func (s *session) Start() {
+	s.isRunning = true
+}
+func (s *session) connclose(c *conn) {
+	s.pool.Remove(c)
 }
 func (s *session) AddFunction(name string, f interface{}) {
 	s.function[name] = f
 }
-
-func (s *session) sendmessage(message CoderMessage) {
-	c := <-s.pool
-	if ok := c.send(message); !ok {
-		s.sendmessage(message)
+func (s *session) Stop() {
+	s.isRunning = false
+	for s.pool.num > 0 {
+		p := s.pool.Get()
+		if p == nil {
+			return
+		}
+		p.stop()
+		s.pool.Put(p)
 	}
-	s.pool <- c
+	//glog.Debugln("session", "pool", "num", s.pool.num)
+}
+
+func (s *session) sendmessage(message CoderMessage, n int) {
+	if !s.isRunning || n > 10 {
+		return
+	}
+	c := s.pool.Get()
+	//glog.Debugln("Session", "sendmessage", n, c)
+	if c == nil || !c.isRunning {
+		time.Sleep(time.Microsecond)
+		s.sendmessage(message, n+1)
+		return
+	}
+	c.send(message)
+	s.pool.Put(c)
+
 }
 
 func (s *session) recivemessage(message CoderMessage) {
@@ -60,13 +99,18 @@ func (s *session) recivemessage(message CoderMessage) {
 			message.Msg = []interface{}{hio.Marshal(r)}
 		} else {
 			message.Type = coderMessageType_InvokeNameError
+			message.Msg = []interface{}{fmt.Sprintf("Func %s not found", name)}
 		}
-		s.sendmessage(message)
+		s.sendmessage(message, 0)
 	case coderMessageType_InvokeRecive:
+		fallthrough
+	case coderMessageType_InvokeNameError:
+		s.mutex.Lock()
 		if v, ok := s.reciveMap[message.ID]; ok {
-			v <- message.Msg
+			v <- message
 			delete(s.reciveMap, message.ID)
 		}
+		s.mutex.Unlock()
 	}
 }
 
@@ -182,18 +226,29 @@ func (s *session) Invoke(
 	body[1] = hio.Marshal(args)
 
 	id := DefaultUUID.GetID()
-	reciveChan := make(chan []interface{})
+	reciveChan := make(chan CoderMessage)
+	s.mutex.Lock()
 	s.reciveMap[id] = reciveChan
+	s.mutex.Unlock()
 	s.sendmessage(CoderMessage{
 		ID:   id,
 		Type: coderMessageType_Invoke,
 		Msg:  body,
-	})
+	}, 0)
 	recives := <-reciveChan
-	glog.Debugln("recives", recives)
+	//glog.Debugln("recives", recives)
+	results = make([]reflect.Value, len(outTypes))
+	switch recives.Type {
+	case coderMessageType_InvokeNameError:
+		for i := 0; i < len(outTypes); i++ {
+			results[i] = reflect.New(outTypes[i]).Elem()
+		}
+		err = fmt.Errorf("%s", recives.Msg[0])
+		//glog.Debugln("coderMessageType_InvokeNameError", len(results), err)
+		return
+	}
 	args = make([]reflect.Value, 0)
-	hio.Unmarshal(recives[0].([]byte), &args)
-	results = make([]reflect.Value, len(args))
+	hio.Unmarshal(recives.Msg[0].([]byte), &args)
 	for i, v := range args {
 		results[i] = v.Elem()
 	}
