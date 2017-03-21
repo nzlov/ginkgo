@@ -3,41 +3,54 @@ package ginkgo
 import (
 	"net"
 
-	"github.com/Sirupsen/logrus"
+	"sync"
+
+	log "github.com/Sirupsen/logrus"
 )
+
+type ServerEvent interface {
+	OnSessionCreate(Session *Session)
+	OnSessionClose(Session *Session)
+}
 
 type ServerOption struct {
 }
 
 type TcpServer struct {
 	methodManager
-	sessions map[string]*session
+	sync.Mutex
+
+	Sessions map[string]*Session
 	coder    Coder
+	event    ServerEvent
 
 	listener *net.TCPListener
 }
 
 func NewTcpServer(coder Coder, listener *net.TCPListener) *TcpServer {
-	s := &TcpServer{
-		sessions: make(map[string]*session),
+	ts := &TcpServer{
+		Sessions: make(map[string]*Session),
 		coder:    coder,
 		listener: listener,
 	}
-	s.initMethodManager()
-	return s
+	ts.initMethodManager()
+	return ts
+}
+func (ts *TcpServer) SetServerEvent(event ServerEvent) {
+	ts.event = event
 }
 
-func (s *TcpServer) Start() {
+func (ts *TcpServer) Start() {
 	var data packet
 	for {
-		c, e := s.listener.Accept()
+		c, e := ts.listener.Accept()
 		if e != nil {
 			panic(e)
 		}
-		logrus.Debugln("TcpServer", "NewConn")
+		log.Debugln("TcpServer", "NewConn")
 		recvData(c, &data)
-		logrus.Debugln("TcpServer", "NewConn", "Data", data)
-		message, err := s.coder.Decoder(data.body)
+		log.Debugln("TcpServer", "NewConn", "Data", data)
+		message, err := ts.coder.Decoder(data.body)
 		if err != nil {
 			c.Close()
 			continue
@@ -46,14 +59,29 @@ func (s *TcpServer) Start() {
 			c.Close()
 			continue
 		}
-		if _, ok := s.sessions[message.ID]; !ok {
-			s.sessions[message.ID] = (&session{}).initSession(0, s.coder)
-			s.sessions[message.ID].setParentMethodManager(&s.methodManager)
-		}
-		s.sessions[message.ID].AddConn(NewConn(c))
 		sendData(c, data)
+		ts.Lock()
+		if _, ok := ts.Sessions[message.ID]; !ok {
+			nSession := (&Session{}).initSession(message.ID, 0, ts.coder)
+			nSession.SetSessionEvent(ts)
+			nSession.setParentMethodManager(&ts.methodManager)
+			ts.Sessions[message.ID] = nSession
+			ts.event.OnSessionCreate(nSession)
+			log.Infoln("TcpServer", "New Session", message.ID)
+		}
+		ts.Sessions[message.ID].AddConn(NewConn(c))
+		ts.Unlock()
 	}
 }
-func (s *TcpServer) Stop() {
-	s.listener.Close()
+func (ts *TcpServer) Stop() {
+	ts.listener.Close()
+}
+func (ts *TcpServer) OnClientConn(s *Session, c *conn)  {}
+func (ts *TcpServer) OnClientClose(s *Session, c *conn) {}
+func (ts *TcpServer) OnClientClear(s *Session) {
+	ts.Lock()
+	delete(ts.Sessions, s.ID)
+	ts.event.OnSessionClose(s)
+	ts.Unlock()
+	log.Infoln("TcpServer", "Del Session", s.ID)
 }

@@ -10,7 +10,7 @@ type ClientOption struct {
 }
 
 type Client struct {
-	session
+	Session
 	host  string
 	coder Coder
 	n     int
@@ -27,7 +27,7 @@ func NewClient(host string, n int, coder Coder) *Client {
 }
 
 func (c *Client) Start() error {
-	c.initSession(c.n, c.coder)
+	c.initSession(c.id, c.n, c.coder)
 	var data packet
 	for i := 0; i < c.n; i++ {
 		conn, err := net.Dial("tcp", c.host)

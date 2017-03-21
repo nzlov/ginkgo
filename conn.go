@@ -9,27 +9,26 @@ import (
 
 type conn struct {
 	baseConn net.Conn
-	session  *session
+	Session  *Session
 
-	isRunning   bool
-	messageChan chan CoderMessage
-	sendChan    chan CoderMessage
+	isRunning bool
+
+	exit chan bool
 }
 
 func NewConn(c net.Conn) *conn {
 	return &conn{
-		isRunning:   false,
-		baseConn:    c,
-		messageChan: make(chan CoderMessage, 10),
-		sendChan:    make(chan CoderMessage, 10),
+		isRunning: false,
+		baseConn:  c,
+		exit:      make(chan bool),
 	}
 }
 
-func (c *conn) setSession(s *session) {
-	c.session = s
+func (c *conn) setSession(s *Session) {
+	c.Session = s
 }
 
-func (c *conn) start() {
+func (c *conn) start(sendChan chan CoderMessage) {
 	c.isRunning = true
 	go func() {
 		defer func() {
@@ -45,34 +44,40 @@ func (c *conn) start() {
 				break
 			}
 			log.Debugln("Conn", "Recive", data)
-			message, err = c.session.coder.Decoder(data.body)
+			message, err = c.Session.coder.Decoder(data.body)
 			if err != nil {
 				continue
 			}
-			c.session.recivemessage(message)
+			go c.Session.recivemessage(message)
 		}
 	}()
 	log.Debugln("Conn", "Start")
-	for m := range c.sendChan {
-		if c.isRunning {
-			log.Debugln("Conn", "SendChan", m)
-			data := c.session.coder.Encoder(m)
-			err := sendData(c.baseConn, packet{
-				body:       data,
-				fullDuplex: true,
-			})
-
-			if err != nil {
-				//glog.NewTagField("conn").Errorln("send", err)
-				c.stop()
-				return
+	for c.isRunning {
+		select {
+		case <-c.exit:
+			break
+		case m := <-sendChan:
+			if c.isRunning {
+				log.Debugln("Conn", "SendChan", m)
+				data := c.Session.coder.Encoder(m)
+				err := sendData(c.baseConn, packet{
+					body:       data,
+					fullDuplex: true,
+				})
+				if err != nil {
+					//glog.NewTagField("conn").Errorln("send", err)
+					sendChan <- m
+					c.stop()
+					return
+				}
+			} else {
+				sendChan <- m
+				break
 			}
-		} else {
-			c.session.sendmessage(m, 0)
 		}
 	}
 	c.baseConn.Close()
-	c.session.connclose(c)
+	c.Session.connclose(c)
 	log.Debugln("Conn", "Stop")
 }
 func (c *conn) stop() {
@@ -80,14 +85,7 @@ func (c *conn) stop() {
 		return
 	}
 	c.isRunning = false
-	close(c.sendChan)
-}
-
-func (c *conn) send(message CoderMessage) bool {
-	if c.isRunning {
-		c.sendChan <- message
-	}
-	return c.isRunning
+	c.exit <- true
 }
 
 //

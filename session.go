@@ -8,89 +8,103 @@ import (
 
 	"sync"
 
-	"time"
-
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
 )
 
-type session struct {
+type SessionEvent interface {
+	OnClientConn(*Session, *conn)
+	OnClientClose(*Session, *conn)
+	OnClientClear(*Session)
+}
+
+type Session struct {
 	methodManager
 	sync.Mutex
-	num int
 
-	isRunning bool
-	count     int
-	pool      *pool
-	coder     Coder
-	sendChan  chan CoderMessage
-	reciveMap map[string]chan CoderMessage
+	connWaitGroup sync.WaitGroup
+	conns         map[string]*conn
+	ID            string
+	isRunning     bool
+	count         int
+	coder         Coder
+	sendChan      chan CoderMessage
+	reciveMap     map[string]chan CoderMessage
+	reciveMutex   sync.Mutex
 
+	event               SessionEvent
 	parentMethodManager *methodManager
 }
 
-func NewSession() session {
-	return session{}
+func NewSession() Session {
+	return Session{}
 }
 
-func (s *session) AddConn(c *conn) {
-	c.setSession(s)
-	b := s.pool.Add(c)
-	if b {
-		go c.start()
-		s.num++
-	} else {
-		c.setSession(nil)
-		c.stop()
+func (s *Session) AddConn(c *conn) {
+	if s.count > 0 && len(s.conns) > s.count || !s.isRunning {
+		return
 	}
+	s.Lock()
+	if s.event != nil {
+		s.event.OnClientConn(s, c)
+	}
+	c.setSession(s)
+	s.conns[c.baseConn.RemoteAddr().String()] = c
+	s.connWaitGroup.Add(1)
+	go c.start(s.sendChan)
+	log.Infoln("Session", "AddConn", c.baseConn.RemoteAddr().String())
+	s.Unlock()
 }
-func (s *session) initSession(n int, coder Coder) *session {
-	s.num = 0
+func (s *Session) SetSessionEvent(event SessionEvent) {
+	s.event = event
+}
+func (s *Session) initSession(id string, n int, coder Coder) *Session {
+	s.ID = id
+	s.count = n
 	s.isRunning = true
 	s.coder = coder
-	s.pool = newPool(n)
-	s.count = n
+	s.connWaitGroup = sync.WaitGroup{}
+	s.conns = make(map[string]*conn)
 	s.sendChan = make(chan CoderMessage, n)
 	s.reciveMap = make(map[string]chan CoderMessage)
+	s.reciveMutex = sync.Mutex{}
 	s.initMethodManager()
 	return s
 }
-func (s *session) setParentMethodManager(manager *methodManager) {
+func (s *Session) setParentMethodManager(manager *methodManager) {
 	s.parentMethodManager = manager
 }
-func (s *session) connclose(c *conn) {
-	s.pool.Remove(c)
-}
-func (s *session) Stop() {
-	s.isRunning = false
-	for s.pool.num > 0 {
-		p := s.pool.Get()
-		if p == nil {
-			return
+func (s *Session) connclose(c *conn) {
+	s.Lock()
+	if s.event != nil {
+		s.event.OnClientClose(s, c)
+	}
+	delete(s.conns, c.baseConn.RemoteAddr().String())
+	s.connWaitGroup.Done()
+	log.Infoln("Session", "DelConn", c.baseConn.RemoteAddr().String())
+	if len(s.conns) == 0 {
+		if s.event != nil {
+			s.event.OnClientClear(s)
 		}
-		p.stop()
-		s.pool.Put(p)
 	}
-	log.Debugln("session", "pool", "num", s.pool.num)
+	s.Unlock()
+}
+func (s *Session) Stop() {
+	s.isRunning = false
+	for _, v := range s.conns {
+		v.stop()
+	}
+	s.connWaitGroup.Wait()
 }
 
-func (s *session) sendmessage(message CoderMessage, n int) {
-	if !s.isRunning || n > 10 {
-		return
+func (s *Session) sendmessage(message CoderMessage, n int) {
+	if s.isRunning {
+		s.sendChan <- message
 	}
-	c := s.pool.Get()
-	if c == nil || !c.isRunning {
-		time.Sleep(time.Microsecond)
-		s.sendmessage(message, n+1)
-		return
-	}
-	c.send(message)
-	s.pool.Put(c)
-
 }
 
-func (s *session) recivemessage(message CoderMessage) {
+func (s *Session) recivemessage(message CoderMessage) {
 	switch message.Type {
 	case coderMessageType_Invoke:
 		message.Type = coderMessageType_InvokeRecive
@@ -115,16 +129,16 @@ func (s *session) recivemessage(message CoderMessage) {
 	case coderMessageType_InvokeRecive:
 		fallthrough
 	case coderMessageType_InvokeNameError:
-		s.Lock()
+		s.reciveMutex.Lock()
 		if v, ok := s.reciveMap[message.ID]; ok {
 			v <- message
 			delete(s.reciveMap, message.ID)
 		}
-		s.Unlock()
+		s.reciveMutex.Unlock()
 	}
 }
 
-func (s *session) UseProto(remoteService interface{}) error {
+func (s *Session) UseProto(remoteService interface{}) error {
 	v := reflect.ValueOf(remoteService)
 	if v.Kind() != reflect.Ptr {
 		return errors.New("UseService: remoteService argument must be a pointer")
@@ -133,7 +147,7 @@ func (s *session) UseProto(remoteService interface{}) error {
 }
 
 // Invoke the remote method synchronous
-func (s *session) Invoke(
+func (s *Session) Invoke(
 	name string,
 	args []reflect.Value,
 	outTypes []reflect.Type) (results []reflect.Value, err error) {
@@ -148,9 +162,9 @@ func (s *session) Invoke(
 
 	id := DefaultUUID.GetID()
 	reciveChan := make(chan CoderMessage)
-	s.Lock()
+	s.reciveMutex.Lock()
 	s.reciveMap[id] = reciveChan
-	s.Unlock()
+	s.reciveMutex.Unlock()
 	s.sendmessage(CoderMessage{
 		ID:   id,
 		Type: coderMessageType_Invoke,
