@@ -2,15 +2,17 @@ package ginkgo
 
 import (
 	"encoding/gob"
-	"net"
+	"reflect"
 
-	"errors"
+	"github.com/Sirupsen/logrus"
+	hio "github.com/hprose/hprose-golang/io"
 )
 
 type coderMessageType int
 
 const (
 	coderMessageType_Unknown = iota
+	coderMessageType_Register
 	coderMessageType_Binary
 	coderMessageType_Invoke
 	coderMessageType_InvokeRecive
@@ -21,6 +23,8 @@ func (c coderMessageType) String() (r string) {
 	switch c {
 	case coderMessageType_Unknown:
 		r = "coderMessageType_Unknown"
+	case coderMessageType_Register:
+		r = "coderMessageType_Register"
 	case coderMessageType_Binary:
 		r = "coderMessageType_Binary"
 	case coderMessageType_Invoke:
@@ -36,41 +40,63 @@ func (c coderMessageType) String() (r string) {
 type CoderMessage struct {
 	ID   string
 	Type coderMessageType
-	Msg  []interface{}
+	Name string
+	Msg  []reflect.Value
 }
 
 type Coder interface {
-	GetCoder(conn net.Conn) Coder
-	Encoder(message CoderMessage) error
-	Decoder() (CoderMessage, error)
+	Encoder(CoderMessage) []byte
+	Decoder([]byte) (CoderMessage, error)
 }
 
-type GobCoder struct {
+type HproseCoder struct {
 	e *gob.Encoder
 	d *gob.Decoder
 }
 
-func NewGobCoder() *GobCoder {
-	return &GobCoder{}
+func NewHproseCoder() *HproseCoder {
+	return &HproseCoder{}
 }
 
-func (g *GobCoder) GetCoder(conn net.Conn) Coder {
-	return &GobCoder{
-		e: gob.NewEncoder(conn),
-		d: gob.NewDecoder(conn),
-	}
-}
-func (g *GobCoder) Encoder(message CoderMessage) error {
-	//glog.Debugln("GobCoder", "Encoder", message)
-	err := g.e.Encode(message)
-	return err
+func (g *HproseCoder) Encoder(message CoderMessage) []byte {
+	//w := hio.NewWriter(true)
+	//switch message.Type {
+	//case coderMessageType_Invoke:
+	//	w.WriteByte(hio.TagCall)
+	//case coderMessageType_InvokeRecive:
+	//	w.WriteByte(hio.TagResult)
+	//}
+	//w.WriteString(message.ID)
+	//w.WriteString(message.Name)
+	//w.WriteInt(int64(len(message.Msg)))
+	//w.WriteSlice(message.Msg)
+	//return w.Bytes()
+	return hio.Marshal(message)
 }
 
-func (g *GobCoder) Decoder() (CoderMessage, error) {
-	c := CoderMessage{}
-	err := g.d.Decode(&c)
-	if c.Type == coderMessageType_Unknown {
-		return CoderMessage{}, errors.New("client exit")
-	}
-	return c, err
+func (g *HproseCoder) Decoder(data []byte) (CoderMessage, error) {
+	//n := len(data)
+	//if n == 0 {
+	//	return CoderMessage{{}}, io.ErrUnexpectedEOF
+	//}
+	//reader := hio.AcquireReader(data, false)
+	//defer hio.ReleaseReader(reader)
+	//message := CoderMessage{}
+	//tag, _ := reader.ReadByte()
+	//switch tag {
+	//case hio.TagCall:
+	//	message.Type = coderMessageType_Invoke
+	//case hio.TagResult:
+	//	message.Type = coderMessageType_InvokeRecive
+	//}
+	//message.ID = reader.ReadString()
+	//message.Name = reader.ReadString()
+	//l := reader.ReadInt()
+	//message.Msg = make([]reflect.Value, l)
+	//reader.ReadSlice(message.Msg)
+	//return message, nil
+	var message CoderMessage
+	logrus.Debugln("Coder", "Decoder", string(data))
+	hio.Unmarshal(data, &message)
+	return message, nil
 }

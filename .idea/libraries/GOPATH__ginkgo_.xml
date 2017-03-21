@@ -27,6 +27,7 @@
       <root url="file://$PROJECT_DIR$/../../../sourcegraph.com" />
       <root url="file://$PROJECT_DIR$/../../../filebrower" />
       <root url="file://$PROJECT_DIR$/../../../md5" />
+      <root url="file://$PROJECT_DIR$/../../../testginkgo" />
     </CLASSES>
     <SOURCES>
       <root url="file://$PROJECT_DIR$/../../../cmusic" />
@@ -55,6 +56,7 @@
       <root url="file://$PROJECT_DIR$/../../../sourcegraph.com" />
       <root url="file://$PROJECT_DIR$/../../../filebrower" />
       <root url="file://$PROJECT_DIR$/../../../md5" />
+      <root url="file://$PROJECT_DIR$/../../../testginkgo" />
     </SOURCES>
     <excluded>
       <root url="file://$PROJECT_DIR$" />

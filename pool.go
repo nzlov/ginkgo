@@ -16,7 +16,7 @@ func newPool(n int) *pool {
 		index:     0,
 		num:       0,
 		limit:     n,
-		pool:      make([]*conn, n, n),
+		pool:      make([]*conn, 0),
 		removemap: make(map[*conn]bool),
 	}
 }
@@ -35,10 +35,12 @@ func (p *pool) Get() *conn {
 }
 func (p *pool) Add(c *conn) bool {
 	p.Lock()
-	if p.num >= cap(p.pool) {
+	if p.num >= p.limit && p.limit > 0 {
 		p.Unlock()
 		return false
 	}
+	p.pool = append(p.pool, &conn{})
+	p.pool[len(p.pool)-1] = nil
 	p.pool[p.index] = c
 	p.index++
 	p.num++
@@ -53,8 +55,9 @@ func (p *pool) Put(c *conn) {
 		return
 	}
 	if ok := p.removemap[c]; ok {
-		p.num--
 		delete(p.removemap, c)
+		p.pool = p.pool[:p.num-1]
+		p.num--
 		p.Unlock()
 		//glog.NewTagField("Pool").Set("removemap", p.removemap).Debugln("Put Remove")
 		return
@@ -78,6 +81,7 @@ func (p *pool) Remove(c *conn) {
 			p.pool[i] = p.pool[i+1]
 		}
 		p.pool[p.index-1] = nil
+		p.pool = p.pool[:p.num-1]
 		p.index--
 		p.num--
 		p.Unlock()

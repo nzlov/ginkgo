@@ -1,11 +1,15 @@
 package ginkgo
 
-import "net"
+import (
+	"bufio"
+	"net"
+
+	log "github.com/Sirupsen/logrus"
+)
 
 type conn struct {
 	baseConn net.Conn
 	session  *session
-	coder    Coder
 
 	isRunning   bool
 	messageChan chan CoderMessage
@@ -23,7 +27,6 @@ func NewConn(c net.Conn) *conn {
 
 func (c *conn) setSession(s *session) {
 	c.session = s
-	c.coder = s.coder.GetCoder(c.baseConn)
 }
 
 func (c *conn) start() {
@@ -32,21 +35,33 @@ func (c *conn) start() {
 		defer func() {
 			c.stop()
 		}()
+		reader := bufio.NewReader(c.baseConn)
+		var data packet
+		var message CoderMessage
+		var err error
 		for c.isRunning {
-			//glog.Debugln("Conn", "Recive", "Wait")
-			n, err := c.coder.Decoder()
-			if err != nil {
-				//glog.NewTagField("conn").Errorln("reicve", err)
-				return
+			log.Debugln("Conn", "Recive", "Wait")
+			if err := recvData(reader, &data); err != nil {
+				break
 			}
-			//glog.Debugln("Conn", "Recive", n)
-			c.session.recivemessage(n)
+			log.Debugln("Conn", "Recive", data)
+			message, err = c.session.coder.Decoder(data.body)
+			if err != nil {
+				continue
+			}
+			c.session.recivemessage(message)
 		}
 	}()
-	//glog.Debugln("Conn", "Start")
+	log.Debugln("Conn", "Start")
 	for m := range c.sendChan {
 		if c.isRunning {
-			err := c.coder.Encoder(m)
+			log.Debugln("Conn", "SendChan", m)
+			data := c.session.coder.Encoder(m)
+			err := sendData(c.baseConn, packet{
+				body:       data,
+				fullDuplex: true,
+			})
+
 			if err != nil {
 				//glog.NewTagField("conn").Errorln("send", err)
 				c.stop()
@@ -58,6 +73,7 @@ func (c *conn) start() {
 	}
 	c.baseConn.Close()
 	c.session.connclose(c)
+	log.Debugln("Conn", "Stop")
 }
 func (c *conn) stop() {
 	if !c.isRunning {
