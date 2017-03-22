@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7a04c397-3202-4ab6-8733-6a80a88cccdf" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/pool.go" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client.go" afterPath="$PROJECT_DIR$/client.go" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder.go" afterPath="$PROJECT_DIR$/coder.go" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conn.go" afterPath="$PROJECT_DIR$/conn.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/reflect.go" afterPath="$PROJECT_DIR$/reflect.go" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/server.go" afterPath="$PROJECT_DIR$/server.go" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/session.go" afterPath="$PROJECT_DIR$/session.go" />
     </list>
@@ -30,36 +30,27 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="server.go" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/server.go">
+      <file leaf-file-name="session.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/session.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1221">
-              <caret line="85" column="44" lean-forward="false" selection-start-line="85" selection-start-column="44" selection-end-line="85" selection-end-column="44" />
+            <state relative-caret-position="986">
+              <caret line="156" column="25" lean-forward="true" selection-start-line="156" selection-start-column="25" selection-end-line="156" selection-end-column="25" />
               <folding>
-                <element signature="e#16#77#0" expanded="true" />
+                <element signature="e#16#111#0" expanded="true" />
+                <marker date="1490166123000" expanded="true" signature="3557:3859" ph="/.../" />
+                <marker date="1490166123000" expanded="true" signature="4824:5013" ph="/.../" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="reflect.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/reflect.go">
+      <file leaf-file-name="server.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/server.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-724">
-              <caret line="73" column="35" lean-forward="false" selection-start-line="73" selection-start-column="35" selection-end-line="73" selection-end-column="35" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="session.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/session.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="83">
-              <caret line="6" column="13" lean-forward="true" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+            <state relative-caret-position="485">
+              <caret line="79" column="1" lean-forward="true" selection-start-line="79" selection-start-column="1" selection-end-line="91" selection-end-column="0" />
               <folding>
-                <marker date="1490106385000" expanded="true" signature="3440:3742" ph="/.../" />
-                <marker date="1490106385000" expanded="true" signature="4477:4666" ph="/.../" />
+                <element signature="e#16#77#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -68,23 +59,41 @@
       <file leaf-file-name="client.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/client.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="381">
-              <caret line="29" column="21" lean-forward="false" selection-start-line="29" selection-start-column="21" selection-end-line="29" selection-end-column="21" />
+            <state relative-caret-position="455">
+              <caret line="44" column="1" lean-forward="true" selection-start-line="44" selection-start-column="1" selection-end-line="44" selection-end-column="1" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="reflect.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/reflect.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1215">
+              <caret line="84" column="37" lean-forward="true" selection-start-line="84" selection-start-column="37" selection-end-line="84" selection-end-column="37" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="coder.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/coder.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1050">
+              <caret line="70" column="26" lean-forward="false" selection-start-line="70" selection-start-column="19" selection-end-line="70" selection-end-column="26" />
               <folding>
-                <element signature="e#16#51#0" expanded="true" />
+                <element signature="e#16#110#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="conn.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/conn.go">
+      <file leaf-file-name="method.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/method.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="596">
-              <caret line="79" column="17" lean-forward="false" selection-start-line="79" selection-start-column="17" selection-end-line="79" selection-end-column="17" />
-              <folding>
-                <element signature="e#16#77#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="435">
+              <caret line="35" column="18" lean-forward="false" selection-start-line="35" selection-start-column="5" selection-end-line="35" selection-end-column="18" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -117,9 +126,11 @@
       <find>FixArguments</find>
       <find>count</find>
       <find>session</find>
+      <find>conn</find>
     </findStrings>
     <replaceStrings>
       <replace>Session</replace>
+      <replace>Conn</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -139,13 +150,13 @@
         <option value="$PROJECT_DIR$/pool.go" />
         <option value="$PROJECT_DIR$/socket_common.go" />
         <option value="$PROJECT_DIR$/../../hprose/hprose-golang/rpc/socket_common.go" />
-        <option value="$PROJECT_DIR$/coder.go" />
         <option value="$PROJECT_DIR$/method.go" />
+        <option value="$PROJECT_DIR$/reflect.go" />
+        <option value="$PROJECT_DIR$/coder.go" />
+        <option value="$PROJECT_DIR$/conn.go" />
+        <option value="$PROJECT_DIR$/server.go" />
         <option value="$PROJECT_DIR$/session.go" />
         <option value="$PROJECT_DIR$/client.go" />
-        <option value="$PROJECT_DIR$/conn.go" />
-        <option value="$PROJECT_DIR$/reflect.go" />
-        <option value="$PROJECT_DIR$/server.go" />
       </list>
     </option>
   </component>
@@ -188,104 +199,6 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GOPATH &lt;ginkgo&gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ginkgo" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GOPATH &lt;ginkgo&gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="github.com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ginkgo" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GOPATH &lt;ginkgo&gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="github.com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="hprose" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="hprose-golang" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ginkgo" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GOPATH &lt;ginkgo&gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="github.com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="hprose" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="hprose-golang" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="rpc" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ginkgo" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ginkgo" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
               <option name="myItemId" value="ginkgo" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -295,13 +208,15 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="go.autoimport" />
-    <property name="configurable.Global.GOPATH.is.expanded" value="true" />
+    <property name="settings.editor.selected.configurable" value="com.goide.configuration.GoLibrariesConfigurableProvider$1" />
+    <property name="configurable.Global.GOPATH.is.expanded" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path" value="/usr/local/bin/node" />
     <property name="js.eslint.eslintPackage" value="" />
     <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="js-jscs-nodeInterpreter" value="/usr/local/bin/node" />
+    <property name="configurable.Project.GOPATH.is.expanded" value="true" />
+    <property name="configurable.Module.GOPATH.is.expanded" value="false" />
   </component>
   <component name="RunManager">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
@@ -384,7 +299,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="1" />
+      <option name="time" value="2" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -701,37 +616,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/socket_common.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="251">
-          <caret line="79" column="5" lean-forward="false" selection-start-line="79" selection-start-column="5" selection-end-line="79" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/method.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="251">
-          <caret line="37" column="8" lean-forward="false" selection-start-line="37" selection-start-column="8" selection-end-line="37" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../hprose/hprose-golang/io/formatter.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="405">
           <caret line="27" column="5" lean-forward="false" selection-start-line="27" selection-start-column="5" selection-end-line="27" selection-end-column="5" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="641">
-          <caret line="73" column="24" lean-forward="false" selection-start-line="73" selection-start-column="24" selection-end-line="73" selection-end-column="24" />
-          <folding>
-            <element signature="e#16#126#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -751,59 +640,84 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/session.go">
+    <entry file="file://$PROJECT_DIR$/method.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="83">
-          <caret line="6" column="13" lean-forward="true" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+        <state relative-caret-position="435">
+          <caret line="35" column="18" lean-forward="false" selection-start-line="35" selection-start-column="5" selection-end-line="35" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1050">
+          <caret line="70" column="26" lean-forward="false" selection-start-line="70" selection-start-column="19" selection-end-line="70" selection-end-column="26" />
           <folding>
-            <marker date="1490106385000" expanded="true" signature="3440:3742" ph="/.../" />
-            <marker date="1490106385000" expanded="true" signature="4477:4666" ph="/.../" />
+            <element signature="e#16#110#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/client.go">
+    <entry file="file://$PROJECT_DIR$/conn.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="381">
-          <caret line="29" column="21" lean-forward="false" selection-start-line="29" selection-start-column="21" selection-end-line="29" selection-end-column="21" />
+        <state relative-caret-position="1200">
+          <caret line="80" column="20" lean-forward="true" selection-start-line="80" selection-start-column="20" selection-end-line="80" selection-end-column="20" />
           <folding>
-            <element signature="e#16#51#0" expanded="true" />
+            <element signature="e#16#77#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/pool.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="32" column="16" lean-forward="false" selection-start-line="32" selection-start-column="16" selection-end-line="32" selection-end-column="16" />
+        <state relative-caret-position="645">
+          <caret line="43" column="27" lean-forward="true" selection-start-line="43" selection-start-column="27" selection-end-line="43" selection-end-column="27" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/conn.go">
+    <entry file="file://$PROJECT_DIR$/client.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="596">
-          <caret line="79" column="17" lean-forward="false" selection-start-line="79" selection-start-column="17" selection-end-line="79" selection-end-column="17" />
-          <folding>
-            <element signature="e#16#77#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="455">
+          <caret line="44" column="1" lean-forward="true" selection-start-line="44" selection-start-column="1" selection-end-line="44" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/reflect.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-724">
-          <caret line="73" column="35" lean-forward="false" selection-start-line="73" selection-start-column="35" selection-end-line="73" selection-end-column="35" />
+        <state relative-caret-position="1215">
+          <caret line="84" column="37" lean-forward="true" selection-start-line="84" selection-start-column="37" selection-end-line="84" selection-end-column="37" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/server.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1221">
-          <caret line="85" column="44" lean-forward="false" selection-start-line="85" selection-start-column="44" selection-end-line="85" selection-end-column="44" />
+        <state relative-caret-position="485">
+          <caret line="79" column="1" lean-forward="true" selection-start-line="79" selection-start-column="1" selection-end-line="91" selection-end-column="0" />
           <folding>
             <element signature="e#16#77#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/socket_common.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="16" column="27" lean-forward="true" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/session.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="986">
+          <caret line="156" column="25" lean-forward="true" selection-start-line="156" selection-start-column="25" selection-end-line="156" selection-end-column="25" />
+          <folding>
+            <element signature="e#16#111#0" expanded="true" />
+            <marker date="1490166123000" expanded="true" signature="3557:3859" ph="/.../" />
+            <marker date="1490166123000" expanded="true" signature="4824:5013" ph="/.../" />
           </folding>
         </state>
       </provider>

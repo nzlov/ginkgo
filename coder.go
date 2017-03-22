@@ -1,7 +1,6 @@
 package ginkgo
 
 import (
-	"encoding/gob"
 	"reflect"
 
 	"github.com/Sirupsen/logrus"
@@ -50,8 +49,6 @@ type Coder interface {
 }
 
 type HproseCoder struct {
-	e *gob.Encoder
-	d *gob.Decoder
 }
 
 func NewHproseCoder() *HproseCoder {

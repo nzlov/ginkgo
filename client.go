@@ -15,19 +15,36 @@ type Client struct {
 	coder Coder
 	n     int
 	id    string
+
+	exit chan bool
 }
 
+func NewClientWithID(host string, id string, n int, coder Coder) *Client {
+	c := &Client{
+		host:  host,
+		n:     n,
+		id:    id,
+		coder: coder,
+		exit:  make(chan bool),
+	}
+	c.initSession(c.id, c.n, c.coder)
+	c.SetSessionEvent(c)
+	return c
+}
 func NewClient(host string, n int, coder Coder) *Client {
-	return &Client{
+	c := &Client{
 		host:  host,
 		n:     n,
 		id:    DefaultUUID.GetID(),
 		coder: coder,
+		exit:  make(chan bool),
 	}
+	c.initSession(c.id, c.n, c.coder)
+	c.SetSessionEvent(c)
+	return c
 }
 
 func (c *Client) Start() error {
-	c.initSession(c.id, c.n, c.coder)
 	var data packet
 	for i := 0; i < c.n; i++ {
 		conn, err := net.Dial("tcp", c.host)
@@ -54,5 +71,17 @@ func (c *Client) Start() error {
 		conns := NewConn(conn)
 		c.AddConn(conns)
 	}
+
+	<-c.exit
+
 	return nil
+}
+func (c *Client) ID() string {
+	return c.id
+}
+
+func (c *Client) OnClientConn(s *Session, conn *Conn)  {}
+func (c *Client) OnClientClose(s *Session, conn *Conn) {}
+func (c *Client) OnClientClear(s *Session) {
+	c.exit <- true
 }

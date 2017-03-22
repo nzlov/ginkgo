@@ -7,7 +7,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type conn struct {
+type Conn struct {
 	baseConn net.Conn
 	Session  *Session
 
@@ -16,19 +16,19 @@ type conn struct {
 	exit chan bool
 }
 
-func NewConn(c net.Conn) *conn {
-	return &conn{
+func NewConn(c net.Conn) *Conn {
+	return &Conn{
 		isRunning: false,
 		baseConn:  c,
 		exit:      make(chan bool),
 	}
 }
 
-func (c *conn) setSession(s *Session) {
+func (c *Conn) setSession(s *Session) {
 	c.Session = s
 }
 
-func (c *conn) start(sendChan chan CoderMessage) {
+func (c *Conn) start(sendChan chan CoderMessage) {
 	c.isRunning = true
 	go func() {
 		defer func() {
@@ -65,10 +65,10 @@ func (c *conn) start(sendChan chan CoderMessage) {
 					fullDuplex: true,
 				})
 				if err != nil {
-					//glog.NewTagField("conn").Errorln("send", err)
+					//glog.NewTagField("Conn").Errorln("send", err)
 					sendChan <- m
 					c.stop()
-					return
+					break
 				}
 			} else {
 				sendChan <- m
@@ -80,7 +80,7 @@ func (c *conn) start(sendChan chan CoderMessage) {
 	c.Session.connclose(c)
 	log.Debugln("Conn", "Stop")
 }
-func (c *conn) stop() {
+func (c *Conn) stop() {
 	if !c.isRunning {
 		return
 	}
@@ -89,7 +89,7 @@ func (c *conn) stop() {
 }
 
 //
-//func (c *conn) invoke() ([]byte, bool) {
+//func (c *Conn) invoke() ([]byte, bool) {
 //	if !c.isRunning {
 //		return nil, false
 //	}

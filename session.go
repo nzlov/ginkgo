@@ -14,8 +14,8 @@ import (
 )
 
 type SessionEvent interface {
-	OnClientConn(*Session, *conn)
-	OnClientClose(*Session, *conn)
+	OnClientConn(*Session, *Conn)
+	OnClientClose(*Session, *Conn)
 	OnClientClear(*Session)
 }
 
@@ -23,8 +23,10 @@ type Session struct {
 	methodManager
 	sync.Mutex
 
+	proto interface{}
+
 	connWaitGroup sync.WaitGroup
-	conns         map[string]*conn
+	conns         map[string]*Conn
 	ID            string
 	isRunning     bool
 	count         int
@@ -41,8 +43,8 @@ func NewSession() Session {
 	return Session{}
 }
 
-func (s *Session) AddConn(c *conn) {
-	if s.count > 0 && len(s.conns) > s.count || !s.isRunning {
+func (s *Session) AddConn(c *Conn) {
+	if s.count > 0 && len(s.conns) >= s.count || !s.isRunning {
 		return
 	}
 	s.Lock()
@@ -53,7 +55,7 @@ func (s *Session) AddConn(c *conn) {
 	s.conns[c.baseConn.RemoteAddr().String()] = c
 	s.connWaitGroup.Add(1)
 	go c.start(s.sendChan)
-	log.Infoln("Session", "AddConn", c.baseConn.RemoteAddr().String())
+	log.Debugln("Session", "AddConn", c.baseConn.RemoteAddr().String())
 	s.Unlock()
 }
 func (s *Session) SetSessionEvent(event SessionEvent) {
@@ -65,7 +67,7 @@ func (s *Session) initSession(id string, n int, coder Coder) *Session {
 	s.isRunning = true
 	s.coder = coder
 	s.connWaitGroup = sync.WaitGroup{}
-	s.conns = make(map[string]*conn)
+	s.conns = make(map[string]*Conn)
 	s.sendChan = make(chan CoderMessage, n)
 	s.reciveMap = make(map[string]chan CoderMessage)
 	s.reciveMutex = sync.Mutex{}
@@ -75,18 +77,19 @@ func (s *Session) initSession(id string, n int, coder Coder) *Session {
 func (s *Session) setParentMethodManager(manager *methodManager) {
 	s.parentMethodManager = manager
 }
-func (s *Session) connclose(c *conn) {
+func (s *Session) connclose(c *Conn) {
 	s.Lock()
 	if s.event != nil {
 		s.event.OnClientClose(s, c)
 	}
 	delete(s.conns, c.baseConn.RemoteAddr().String())
 	s.connWaitGroup.Done()
-	log.Infoln("Session", "DelConn", c.baseConn.RemoteAddr().String())
+	log.Debugln("Session", "DelConn", c.baseConn.RemoteAddr().String())
 	if len(s.conns) == 0 {
 		if s.event != nil {
 			s.event.OnClientClear(s)
 		}
+		s.Stop()
 	}
 	s.Unlock()
 }
@@ -121,7 +124,6 @@ func (s *Session) recivemessage(message CoderMessage) {
 			r := f.Function.Call(nargs)
 			message.Msg = r
 		} else {
-
 			message.Type = coderMessageType_InvokeNameError
 			message.Msg = []reflect.Value{reflect.ValueOf(fmt.Sprintf("Func %s not found", name))}
 		}
@@ -139,11 +141,16 @@ func (s *Session) recivemessage(message CoderMessage) {
 }
 
 func (s *Session) UseProto(remoteService interface{}) error {
+	s.proto = remoteService
+
 	v := reflect.ValueOf(remoteService)
 	if v.Kind() != reflect.Ptr {
 		return errors.New("UseService: remoteService argument must be a pointer")
 	}
 	return buildRemoteService(s, v)
+}
+func (s *Session) Proto() interface{} {
+	return s.proto
 }
 
 // Invoke the remote method synchronous
@@ -159,6 +166,14 @@ func (s *Session) Invoke(
 	//		results[i] = reflect.New(context.ResultTypes[i]).Elem()
 	//	}
 	//}
+	if !s.isRunning {
+		for i := 0; i < len(outTypes); i++ {
+			results[i] = reflect.New(outTypes[i]).Elem()
+		}
+		err = fmt.Errorf("Session Close")
+		//glog.Debugln("coderMessageType_InvokeNameError", len(results), err)
+		return
+	}
 
 	id := DefaultUUID.GetID()
 	reciveChan := make(chan CoderMessage)

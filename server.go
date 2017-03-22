@@ -66,7 +66,9 @@ func (ts *TcpServer) Start() {
 			nSession.SetSessionEvent(ts)
 			nSession.setParentMethodManager(&ts.methodManager)
 			ts.Sessions[message.ID] = nSession
-			ts.event.OnSessionCreate(nSession)
+			if ts.event != nil {
+				ts.event.OnSessionCreate(nSession)
+			}
 			log.Infoln("TcpServer", "New Session", message.ID)
 		}
 		ts.Sessions[message.ID].AddConn(NewConn(c))
@@ -76,12 +78,14 @@ func (ts *TcpServer) Start() {
 func (ts *TcpServer) Stop() {
 	ts.listener.Close()
 }
-func (ts *TcpServer) OnClientConn(s *Session, c *conn)  {}
-func (ts *TcpServer) OnClientClose(s *Session, c *conn) {}
+func (ts *TcpServer) OnClientConn(s *Session, c *Conn)  {}
+func (ts *TcpServer) OnClientClose(s *Session, c *Conn) {}
 func (ts *TcpServer) OnClientClear(s *Session) {
 	ts.Lock()
 	delete(ts.Sessions, s.ID)
-	ts.event.OnSessionClose(s)
+	if ts.event != nil {
+		ts.event.OnSessionClose(s)
+	}
 	ts.Unlock()
 	log.Infoln("TcpServer", "Del Session", s.ID)
 }
