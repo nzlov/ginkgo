@@ -16,7 +16,7 @@ type Client struct {
 	n     int
 	id    string
 
-	exit chan bool
+	//exit chan bool
 }
 
 func NewClientWithID(host string, id string, n int, coder Coder) *Client {
@@ -25,10 +25,10 @@ func NewClientWithID(host string, id string, n int, coder Coder) *Client {
 		n:     n,
 		id:    id,
 		coder: coder,
-		exit:  make(chan bool),
+		//exit:  make(chan bool),
 	}
 	c.initSession(c.id, c.n, c.coder)
-	c.SetSessionEvent(c)
+	//c.SetSessionEvent(c)
 	return c
 }
 func NewClient(host string, n int, coder Coder) *Client {
@@ -37,10 +37,10 @@ func NewClient(host string, n int, coder Coder) *Client {
 		n:     n,
 		id:    DefaultUUID.GetID(),
 		coder: coder,
-		exit:  make(chan bool),
+		//exit:  make(chan bool),
 	}
 	c.initSession(c.id, c.n, c.coder)
-	c.SetSessionEvent(c)
+	//c.SetSessionEvent(c)
 	return c
 }
 
@@ -72,16 +72,9 @@ func (c *Client) Start() error {
 		c.AddConn(conns)
 	}
 
-	<-c.exit
-
 	return nil
 }
+
 func (c *Client) ID() string {
 	return c.id
-}
-
-func (c *Client) OnClientConn(s *Session, conn *Conn)  {}
-func (c *Client) OnClientClose(s *Session, conn *Conn) {}
-func (c *Client) OnClientClear(s *Session) {
-	c.exit <- true
 }

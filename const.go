@@ -8,5 +8,7 @@ var (
 )
 
 var (
-	errorType = reflect.TypeOf((*error)(nil)).Elem()
+	errorType     = reflect.TypeOf((*error)(nil)).Elem()
+	interfaceType = reflect.TypeOf((*interface{})(nil)).Elem()
+	sessionType   = reflect.TypeOf((*Session)(nil))
 )

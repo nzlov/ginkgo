@@ -121,6 +121,14 @@ func (s *Session) recivemessage(message CoderMessage) {
 			for i, v := range message.Msg {
 				nargs[i] = v.Elem()
 			}
+			ft := f.Function.Type()
+			lat := ft.In(ft.NumIn() - 1)
+			if !ft.IsVariadic() {
+				if lat == interfaceType || lat == sessionType {
+					nargs = append(nargs, reflect.ValueOf(s))
+				}
+			}
+
 			r := f.Function.Call(nargs)
 			message.Msg = r
 		} else {
@@ -167,6 +175,7 @@ func (s *Session) Invoke(
 	//	}
 	//}
 	if !s.isRunning {
+		log.Debugln("name", name, "outTypes", len(outTypes), "results", len(results))
 		for i := 0; i < len(outTypes); i++ {
 			results[i] = reflect.New(outTypes[i]).Elem()
 		}
