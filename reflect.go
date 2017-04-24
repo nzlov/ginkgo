@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-func buildRemoteService(s *Session, v reflect.Value) error {
+func buildRemoteService(s *session, v reflect.Value) error {
 	v = v.Elem()
 	t := v.Type()
 	et := t
@@ -39,7 +39,7 @@ func buildRemoteService(s *Session, v reflect.Value) error {
 	return nil
 }
 
-func buildRemoteMethod(s *Session,
+func buildRemoteMethod(s *session,
 	f reflect.Value, ft reflect.Type, sf reflect.StructField) error {
 	name := getRemoteMethodName(sf)
 	outTypes, hasError := getResultTypes(ft)
@@ -71,7 +71,7 @@ func buildRemoteMethod(s *Session,
 	return nil
 }
 
-func getSyncRemoteMethod(s *Session,
+func getSyncRemoteMethod(s *session,
 	name string,
 	outTypes []reflect.Type,
 	isVariadic, hasError bool) func(in []reflect.Value) (out []reflect.Value) {

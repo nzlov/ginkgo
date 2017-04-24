@@ -13,21 +13,31 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type SessionEvent interface {
-	OnClientConn(*Session, *Conn)
-	OnClientClose(*Session, *Conn)
-	OnClientClear(*Session)
+type Session interface {
+	ID() string
+
+	Proto() interface{}
+	UseProto(remoteService interface{}) error
+
+	Invoke(name string, args []reflect.Value, outTypes []reflect.Type) (results []reflect.Value, err error)
 }
 
-type Session struct {
+type SessionEvent interface {
+	OnClientConn(Session, *Conn)
+	OnClientClose(Session, *Conn)
+	OnClientClear(Session)
+}
+
+type session struct {
 	methodManager
 	sync.Mutex
 
-	proto interface{}
+	proto     interface{}
+	protoType reflect.Type
 
 	connWaitGroup sync.WaitGroup
 	conns         map[string]*Conn
-	ID            string
+	id            string
 	isRunning     bool
 	count         int
 	coder         Coder
@@ -39,11 +49,7 @@ type Session struct {
 	parentMethodManager *methodManager
 }
 
-func NewSession() Session {
-	return Session{}
-}
-
-func (s *Session) AddConn(c *Conn) {
+func (s *session) addConn(c *Conn) {
 	if s.count > 0 && len(s.conns) >= s.count || !s.isRunning {
 		return
 	}
@@ -58,11 +64,14 @@ func (s *Session) AddConn(c *Conn) {
 	log.Debugln("Session", "AddConn", c.baseConn.RemoteAddr().String())
 	s.Unlock()
 }
-func (s *Session) SetSessionEvent(event SessionEvent) {
+func (s *session) SetSessionEvent(event SessionEvent) {
 	s.event = event
 }
-func (s *Session) initSession(id string, n int, coder Coder) *Session {
-	s.ID = id
+func (s *session) ID() string {
+	return s.id
+}
+func (s *session) initSession(id string, n int, coder Coder) *session {
+	s.id = id
 	s.count = n
 	s.isRunning = true
 	s.coder = coder
@@ -74,10 +83,10 @@ func (s *Session) initSession(id string, n int, coder Coder) *Session {
 	s.initMethodManager()
 	return s
 }
-func (s *Session) setParentMethodManager(manager *methodManager) {
+func (s *session) setParentMethodManager(manager *methodManager) {
 	s.parentMethodManager = manager
 }
-func (s *Session) connclose(c *Conn) {
+func (s *session) connclose(c *Conn) {
 	s.Lock()
 	if s.event != nil {
 		s.event.OnClientClose(s, c)
@@ -86,14 +95,20 @@ func (s *Session) connclose(c *Conn) {
 	s.connWaitGroup.Done()
 	log.Debugln("Session", "DelConn", c.baseConn.RemoteAddr().String())
 	if len(s.conns) == 0 {
+		closeMsg := CoderMessage{
+			Type: coderMessageType_SessionCloseError,
+		}
+		for _, r := range s.reciveMap {
+			r <- closeMsg
+		}
 		if s.event != nil {
 			s.event.OnClientClear(s)
 		}
-		s.Stop()
+		s.stop()
 	}
 	s.Unlock()
 }
-func (s *Session) Stop() {
+func (s *session) stop() {
 	s.isRunning = false
 	for _, v := range s.conns {
 		v.stop()
@@ -101,13 +116,13 @@ func (s *Session) Stop() {
 	s.connWaitGroup.Wait()
 }
 
-func (s *Session) sendmessage(message CoderMessage, n int) {
+func (s *session) sendmessage(message CoderMessage, n int) {
 	if s.isRunning {
 		s.sendChan <- message
 	}
 }
 
-func (s *Session) recivemessage(message CoderMessage) {
+func (s *session) recivemessage(message CoderMessage) {
 	switch message.Type {
 	case coderMessageType_Invoke:
 		message.Type = coderMessageType_InvokeRecive
@@ -122,13 +137,32 @@ func (s *Session) recivemessage(message CoderMessage) {
 				nargs[i] = v.Elem()
 			}
 			ft := f.Function.Type()
-			lat := ft.In(ft.NumIn() - 1)
-			if !ft.IsVariadic() {
-				if lat == interfaceType || lat == sessionType {
+
+			if ft.NumIn() > 1 {
+				lat := ft.In(ft.NumIn() - 2)
+				switch lat {
+				case interfaceType, sessionType:
 					nargs = append(nargs, reflect.ValueOf(s))
+				case s.protoType:
+					nargs = append(nargs, reflect.ValueOf(s.proto))
+				case s.protoType.Elem():
+					nargs = append(nargs, reflect.ValueOf(s.proto).Elem())
 				}
 			}
 
+			if ft.NumIn() > 0 {
+				lat := ft.In(ft.NumIn() - 1)
+				if !ft.IsVariadic() {
+					switch lat {
+					case interfaceType, sessionType:
+						nargs = append(nargs, reflect.ValueOf(s))
+					case s.protoType:
+						nargs = append(nargs, reflect.ValueOf(s.proto))
+					case s.protoType.Elem():
+						nargs = append(nargs, reflect.ValueOf(s.proto).Elem())
+					}
+				}
+			}
 			r := f.Function.Call(nargs)
 			message.Msg = r
 		} else {
@@ -148,8 +182,9 @@ func (s *Session) recivemessage(message CoderMessage) {
 	}
 }
 
-func (s *Session) UseProto(remoteService interface{}) error {
+func (s *session) UseProto(remoteService interface{}) error {
 	s.proto = remoteService
+	s.protoType = reflect.TypeOf(remoteService)
 
 	v := reflect.ValueOf(remoteService)
 	if v.Kind() != reflect.Ptr {
@@ -157,12 +192,12 @@ func (s *Session) UseProto(remoteService interface{}) error {
 	}
 	return buildRemoteService(s, v)
 }
-func (s *Session) Proto() interface{} {
+func (s *session) Proto() interface{} {
 	return s.proto
 }
 
 // Invoke the remote method synchronous
-func (s *Session) Invoke(
+func (s *session) Invoke(
 	name string,
 	args []reflect.Value,
 	outTypes []reflect.Type) (results []reflect.Value, err error) {
@@ -179,7 +214,7 @@ func (s *Session) Invoke(
 		for i := 0; i < len(outTypes); i++ {
 			results[i] = reflect.New(outTypes[i]).Elem()
 		}
-		err = fmt.Errorf("Session Close")
+		err = fmt.Errorf("session Close")
 		//glog.Debugln("coderMessageType_InvokeNameError", len(results), err)
 		return
 	}
@@ -199,6 +234,12 @@ func (s *Session) Invoke(
 	//glog.Debugln("recives", recives)
 	results = make([]reflect.Value, len(outTypes))
 	switch recives.Type {
+	case coderMessageType_SessionCloseError:
+		for i := 0; i < len(outTypes); i++ {
+			results[i] = reflect.New(outTypes[i]).Elem()
+		}
+		err = fmt.Errorf("%s", "Session Close.")
+		return
 	case coderMessageType_InvokeNameError:
 		for i := 0; i < len(outTypes); i++ {
 			results[i] = reflect.New(outTypes[i]).Elem()

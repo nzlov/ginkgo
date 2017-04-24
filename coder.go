@@ -16,6 +16,7 @@ const (
 	coderMessageType_Invoke
 	coderMessageType_InvokeRecive
 	coderMessageType_InvokeNameError
+	coderMessageType_SessionCloseError
 )
 
 func (c coderMessageType) String() (r string) {
@@ -32,6 +33,8 @@ func (c coderMessageType) String() (r string) {
 		r = "coderMessageType_InvokeRecive"
 	case coderMessageType_InvokeNameError:
 		r = "coderMessageType_InvokeNameError"
+	case coderMessageType_SessionCloseError:
+		r = "coderMessageType_SessionCloseError"
 	}
 	return
 }
