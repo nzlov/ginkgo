@@ -27,6 +27,18 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
+type method interface {
+	AddFunction(name string, function interface{})
+	AddFunctions(names []string, functions []interface{})
+	AddMethod(name string, obj interface{}, alias string)
+	AddMethods(names []string, obj interface{}, aliases []string)
+	AddInstanceMethods(obj interface{})
+	AddAllMethods(obj interface{})
+	AddMissingMethod(method MissingMethod)
+	AddNetRPCMethods(rcvr interface{})
+	Remove(name string)
+}
+
 // Method is the published service method
 type Method struct {
 	Function reflect.Value

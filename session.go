@@ -14,6 +14,8 @@ import (
 )
 
 type Session interface {
+	method
+
 	ID() string
 
 	Proto() interface{}
