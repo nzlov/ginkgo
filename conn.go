@@ -9,7 +9,7 @@ import (
 
 type Conn struct {
 	baseConn net.Conn
-	Session  *Session
+	Session  *session
 
 	isRunning bool
 
@@ -24,7 +24,7 @@ func NewConn(c net.Conn) *Conn {
 	}
 }
 
-func (c *Conn) setSession(s *Session) {
+func (c *Conn) setSession(s *session) {
 	c.Session = s
 }
 

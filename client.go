@@ -10,7 +10,7 @@ type ClientOption struct {
 }
 
 type Client struct {
-	Session
+	session
 	host  string
 	coder Coder
 	n     int
@@ -69,7 +69,7 @@ func (c *Client) Start() error {
 			return fmt.Errorf("Conn register lose!")
 		}
 		conns := NewConn(conn)
-		c.AddConn(conns)
+		c.addConn(conns)
 	}
 
 	return nil

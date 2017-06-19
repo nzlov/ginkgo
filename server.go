@@ -9,8 +9,8 @@ import (
 )
 
 type ServerEvent interface {
-	OnSessionCreate(Session *Session)
-	OnSessionClose(Session *Session)
+	OnSessionCreate(session Session)
+	OnSessionClose(session Session)
 }
 
 type ServerOption struct {
@@ -20,7 +20,7 @@ type TcpServer struct {
 	methodManager
 	sync.Mutex
 
-	Sessions map[string]*Session
+	Sessions map[string]*session
 	coder    Coder
 	event    ServerEvent
 
@@ -29,7 +29,7 @@ type TcpServer struct {
 
 func NewTcpServer(coder Coder, listener *net.TCPListener) *TcpServer {
 	ts := &TcpServer{
-		Sessions: make(map[string]*Session),
+		Sessions: make(map[string]*session),
 		coder:    coder,
 		listener: listener,
 	}
@@ -62,7 +62,7 @@ func (ts *TcpServer) Start() {
 		sendData(c, data)
 		ts.Lock()
 		if _, ok := ts.Sessions[message.ID]; !ok {
-			nSession := (&Session{}).initSession(message.ID, 0, ts.coder)
+			nSession := (&session{}).initSession(message.ID, 0, ts.coder)
 			nSession.SetSessionEvent(ts)
 			nSession.setParentMethodManager(&ts.methodManager)
 			ts.Sessions[message.ID] = nSession
@@ -71,18 +71,18 @@ func (ts *TcpServer) Start() {
 			}
 			log.Infoln("TcpServer", "New Session", message.ID)
 		}
-		ts.Sessions[message.ID].AddConn(NewConn(c))
+		ts.Sessions[message.ID].addConn(NewConn(c))
 		ts.Unlock()
 	}
 }
 func (ts *TcpServer) Stop() {
 	ts.listener.Close()
 }
-func (ts *TcpServer) OnClientConn(s *Session, c *Conn)  {}
-func (ts *TcpServer) OnClientClose(s *Session, c *Conn) {}
-func (ts *TcpServer) OnClientClear(s *Session) {
+func (ts *TcpServer) OnClientConn(s Session, c *Conn)  {}
+func (ts *TcpServer) OnClientClose(s Session, c *Conn) {}
+func (ts *TcpServer) OnClientClear(s Session) {
 	ts.Lock()
-	delete(ts.Sessions, s.ID)
+	delete(ts.Sessions, s.ID())
 	if ts.event != nil {
 		ts.event.OnSessionClose(s)
 	}
