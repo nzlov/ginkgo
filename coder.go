@@ -15,6 +15,7 @@ const (
 	coderMessageType_Binary
 	coderMessageType_Invoke
 	coderMessageType_InvokeRecive
+	coderMessageType_InvokeError
 	coderMessageType_InvokeNameError
 )
 
@@ -30,6 +31,8 @@ func (c coderMessageType) String() (r string) {
 		r = "coderMessageType_Invoke"
 	case coderMessageType_InvokeRecive:
 		r = "coderMessageType_InvokeRecive"
+	case coderMessageType_InvokeError:
+		r = "coderMessageType_InvokeError"
 	case coderMessageType_InvokeNameError:
 		r = "coderMessageType_InvokeNameError"
 	}

@@ -130,15 +130,23 @@ func (s *Session) recivemessage(message CoderMessage) {
 			}
 
 			r := f.Function.Call(nargs)
-			message.Msg = r
+			if len(r) > 0 && r[len(r)-1].Type() == errorType {
+				rerr := r[len(r)-1]
+				if rerr.IsNil() {
+					message.Msg = r[:len(r)-1]
+				} else {
+					message.Type = coderMessageType_InvokeError
+					message.Msg = []reflect.Value{reflect.ValueOf(fmt.Sprint(rerr.Elem()))}
+				}
+			} else {
+				message.Msg = r
+			}
 		} else {
 			message.Type = coderMessageType_InvokeNameError
 			message.Msg = []reflect.Value{reflect.ValueOf(fmt.Sprintf("Func %s not found", name))}
 		}
 		s.sendmessage(message, 0)
-	case coderMessageType_InvokeRecive:
-		fallthrough
-	case coderMessageType_InvokeNameError:
+	default:
 		s.reciveMutex.Lock()
 		if v, ok := s.reciveMap[message.ID]; ok {
 			v <- message
@@ -196,7 +204,7 @@ func (s *Session) Invoke(
 		Msg:  args,
 	}, 0)
 	recives := <-reciveChan
-	//glog.Debugln("recives", recives)
+	log.Debugln("recives", recives)
 	results = make([]reflect.Value, len(outTypes))
 	switch recives.Type {
 	case coderMessageType_InvokeNameError:
@@ -204,8 +212,16 @@ func (s *Session) Invoke(
 			results[i] = reflect.New(outTypes[i]).Elem()
 		}
 		err = fmt.Errorf("%s", recives.Msg[0])
-		//glog.Debugln("coderMessageType_InvokeNameError", len(results), err)
+		log.Debugln("coderMessageType_InvokeNameError", len(results), err)
 		return
+	case coderMessageType_InvokeError:
+		for i := 0; i < len(outTypes); i++ {
+			results[i] = reflect.New(outTypes[i]).Elem()
+		}
+		err = fmt.Errorf("%s", recives.Msg[0])
+		log.Debugln("coderMessageType_InvokeError", len(results), err)
+		return
+
 	}
 	args = make([]reflect.Value, 0)
 	for i, v := range recives.Msg {

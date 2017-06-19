@@ -1,6 +1,8 @@
 <component name="libraryTable">
   <library name="GOPATH &lt;ginkgo&gt;">
     <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../../ginkgochat" />
+      <root url="file://$PROJECT_DIR$/../../../testxorm" />
       <root url="file://$PROJECT_DIR$/../../../cmusic" />
       <root url="file://$PROJECT_DIR$/../../../qtexample" />
       <root url="file://$PROJECT_DIR$/../../../engo.io" />
@@ -28,8 +30,12 @@
       <root url="file://$PROJECT_DIR$/../../../filebrower" />
       <root url="file://$PROJECT_DIR$/../../../md5" />
       <root url="file://$PROJECT_DIR$/../../../testginkgo" />
+      <root url="file://$PROJECT_DIR$/../../../.idea" />
+      <root url="file://$PROJECT_DIR$/../../../webvideopush" />
     </CLASSES>
     <SOURCES>
+      <root url="file://$PROJECT_DIR$/../../../ginkgochat" />
+      <root url="file://$PROJECT_DIR$/../../../testxorm" />
       <root url="file://$PROJECT_DIR$/../../../cmusic" />
       <root url="file://$PROJECT_DIR$/../../../qtexample" />
       <root url="file://$PROJECT_DIR$/../../../engo.io" />
@@ -57,6 +63,8 @@
       <root url="file://$PROJECT_DIR$/../../../filebrower" />
       <root url="file://$PROJECT_DIR$/../../../md5" />
       <root url="file://$PROJECT_DIR$/../../../testginkgo" />
+      <root url="file://$PROJECT_DIR$/../../../.idea" />
+      <root url="file://$PROJECT_DIR$/../../../webvideopush" />
     </SOURCES>
     <excluded>
       <root url="file://$PROJECT_DIR$" />
