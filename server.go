@@ -43,36 +43,38 @@ func (ts *TcpServer) SetServerEvent(event ServerEvent) {
 func (ts *TcpServer) Start() {
 	var data packet
 	for {
-		c, e := ts.listener.Accept()
+		conn, e := ts.listener.Accept()
 		if e != nil {
 			panic(e)
 		}
-		log.Debugln("TcpServer", "NewConn")
-		recvData(c, &data)
-		log.Debugln("TcpServer", "NewConn", "Data", data)
-		message, err := ts.coder.Decoder(data.body)
-		if err != nil {
-			c.Close()
-			continue
-		}
-		if message.Type != coderMessageType_Register {
-			c.Close()
-			continue
-		}
-		sendData(c, data)
-		ts.Lock()
-		if _, ok := ts.Sessions[message.ID]; !ok {
-			nSession := (&session{}).initSession(message.ID, 0, ts.coder)
-			nSession.SetSessionEvent(ts)
-			nSession.setParentMethodManager(&ts.methodManager)
-			ts.Sessions[message.ID] = nSession
-			if ts.event != nil {
-				ts.event.OnSessionCreate(nSession)
+		go func(c net.Conn) {
+			log.Debugln("TcpServer", "NewConn")
+			recvData(c, &data)
+			log.Debugln("TcpServer", "NewConn", "Data", data)
+			message, err := ts.coder.Decoder(data.body)
+			if err != nil {
+				c.Close()
+				return
 			}
-			log.Infoln("TcpServer", "New Session", message.ID)
-		}
-		ts.Sessions[message.ID].addConn(NewConn(c))
-		ts.Unlock()
+			if message.Type != coderMessageType_Register {
+				c.Close()
+				return
+			}
+			sendData(c, data)
+			ts.Lock()
+			if _, ok := ts.Sessions[message.ID]; !ok {
+				nSession := (&session{}).initSession(message.ID, 0, ts.coder)
+				nSession.SetSessionEvent(ts)
+				nSession.setParentMethodManager(&ts.methodManager)
+				ts.Sessions[message.ID] = nSession
+				if ts.event != nil {
+					ts.event.OnSessionCreate(nSession)
+				}
+				log.Infoln("TcpServer", "New Session", message.ID)
+			}
+			ts.Sessions[message.ID].addConn(NewConn(c))
+			ts.Unlock()
+		}(conn)
 	}
 }
 func (ts *TcpServer) Stop() {

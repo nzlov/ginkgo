@@ -3,6 +3,9 @@ package main
 import (
 	"os"
 
+	"sync"
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/nzlov/ginkgo"
 )
@@ -58,34 +61,33 @@ func main() {
 	log.Println(p.Chu(2, 0))
 	log.Println(p.Chu(2, 0))
 
-	log.Println("Exit")
+	//log.Println("Exit")
 
-	//
-	//count := 0
-	//schan := make(chan bool)
-	//exit := make(chan bool)
-	//w := sync.WaitGroup{}
-	//isrunning := true
-	//go func() {
-	//	for _ = range schan {
-	//		p.Add(1, 2)
-	//		count++
-	//	}
-	//}()
-	//go func() {
-	//	for isrunning {
-	//		select {
-	//		case <-exit:
-	//			close(schan)
-	//			log.Infoln("Count:", count, time.Second/time.Duration(count))
-	//			isrunning = false
-	//			w.Done()
-	//		case schan <- true:
-	//		}
-	//	}
-	//}()
-	//w.Add(1)
-	//<-time.After(time.Second)
-	//exit <- true
-	//w.Wait()
+	count := 0
+	schan := make(chan bool)
+	exit := make(chan bool)
+	w := sync.WaitGroup{}
+	isrunning := true
+	go func() {
+		for _ = range schan {
+			p.Add(1, 2)
+			count++
+		}
+	}()
+	go func() {
+		for isrunning {
+			select {
+			case <-exit:
+				close(schan)
+				log.Infoln("Count:", count, time.Second/time.Duration(count))
+				isrunning = false
+				w.Done()
+			case schan <- true:
+			}
+		}
+	}()
+	w.Add(1)
+	<-time.After(time.Second)
+	exit <- true
+	w.Wait()
 }
